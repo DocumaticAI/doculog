@@ -3,95 +3,9 @@ Changelog framework.
 """
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 from autolog.git import get_commits, list_tags
-
-
-def catalog_commit(commit: str):
-    commit_types = {
-        "fixed": "Fixed",
-        "fixes": "Fixed",
-        "fix": "Fixed",
-        "bugfix": "Fixed",
-        "solve": "Fixed",
-        "solves": "Fixed",
-        "solved": "Fixed",
-        "close": "Fixed",
-        "closes": "Fixed",
-        "closed": "Fixed",
-        "corrects": "Fixed",
-        "correct": "Fixed",
-        "corrected": "Fixed",
-        "create": "Added",
-        "creates": "Added",
-        "created": "Added",
-        "make": "Added",
-        "makes": "Added",
-        "made": "Added",
-        "write": "Added",
-        "wrote": "Added",
-        "add": "Added",
-        "adds": "Added",
-        "added": "Added",
-        "deprecate": "Changed",
-        "deprecates": "Changed",
-        "deprecated": "Changed",
-        "list": "Changed",
-        "lists": "Changed",
-        "use": "Changed",
-        "uses": "Changed",
-        "fetch": "Changed",
-        "fetches": "Changed",
-        "fetched": "Changed",
-        "log": "Changed",
-        "logs": "Changed",
-        "logged": "Changed",
-        "improve": "Changed",
-        "improves": "Changed",
-        "improved": "Changed",
-        "print": "Changed",
-        "prints": "Changed",
-        "printed": "Changed",
-        "rewrite": "Changed",
-        "rewrote": "Changed",
-        "rewrit": "Changed",
-        "refactor": "Changed",
-        "change": "Changed",
-        "changes": "Changed",
-        "changed": "Changed",
-        "move": "Changed",
-        "moves": "Changed",
-        "moved": "Changed",
-        "update": "Changed",
-        "updates": "Changed",
-        "updated": "Changed",
-        "tweak": "Changed",
-        "tweaks": "Changed",
-        "tweaked": "Changed",
-        "remove": "Removed",
-        "removes": "Removed",
-        "removed": "Removed",
-        "delete": "Removed",
-        "deletes": "Removed",
-        "deleted": "Removed",
-        "deprecate": "Deprecated",
-        "deprecates": "Deprecated",
-        "deprecated": "Deprecated",
-    }
-
-    commit_lower = commit.lower()
-    cleaned_commit = None
-    start_word = commit_lower.split(" ")[0]
-
-    try:
-        commit_type = commit_types[start_word]
-        cleaned_commit = commit_lower.replace(start_word, "").strip().capitalize()
-        return commit_type, cleaned_commit
-    except KeyError:
-        pass
-
-    return None, None
 
 
 class ChangelogSection:
@@ -188,12 +102,108 @@ class ChangelogRelease:
 
         for com in commits:
             if title := com["title"]:
-                commit_type, clean_commit = catalog_commit(title)
+                commit_type, clean_commit = self.catalog_commit(title)
                 if commit_type is not None:
                     self._sections[commit_type].add_commit(clean_commit)
 
         for section in self._sections.keys():
             self._sections[section].remove_duplicates()
+
+    @staticmethod
+    def catalog_commit(commit: str) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Naively catalog a commit based on the leading word.
+
+        Expects commits to be started by an imperitive verb,
+        however non-imperitive will also be considered.
+
+        Returns
+        -------
+        str or None
+            The type of the commit.
+        str or None
+            The "cleaned" commit. Leading keyword removed.
+        """
+        commit_types = {
+            "fixed": "Fixed",
+            "fixes": "Fixed",
+            "fix": "Fixed",
+            "bugfix": "Fixed",
+            "solve": "Fixed",
+            "solves": "Fixed",
+            "solved": "Fixed",
+            "close": "Fixed",
+            "closes": "Fixed",
+            "closed": "Fixed",
+            "corrects": "Fixed",
+            "correct": "Fixed",
+            "corrected": "Fixed",
+            "create": "Added",
+            "creates": "Added",
+            "created": "Added",
+            "make": "Added",
+            "makes": "Added",
+            "made": "Added",
+            "write": "Added",
+            "wrote": "Added",
+            "add": "Added",
+            "adds": "Added",
+            "added": "Added",
+            "list": "Changed",
+            "lists": "Changed",
+            "use": "Changed",
+            "uses": "Changed",
+            "fetch": "Changed",
+            "fetches": "Changed",
+            "fetched": "Changed",
+            "log": "Changed",
+            "logs": "Changed",
+            "logged": "Changed",
+            "improve": "Changed",
+            "improves": "Changed",
+            "improved": "Changed",
+            "print": "Changed",
+            "prints": "Changed",
+            "printed": "Changed",
+            "rewrite": "Changed",
+            "rewrote": "Changed",
+            "rewrit": "Changed",
+            "refactor": "Changed",
+            "change": "Changed",
+            "changes": "Changed",
+            "changed": "Changed",
+            "move": "Changed",
+            "moves": "Changed",
+            "moved": "Changed",
+            "update": "Changed",
+            "updates": "Changed",
+            "updated": "Changed",
+            "tweak": "Changed",
+            "tweaks": "Changed",
+            "tweaked": "Changed",
+            "remove": "Removed",
+            "removes": "Removed",
+            "removed": "Removed",
+            "delete": "Removed",
+            "deletes": "Removed",
+            "deleted": "Removed",
+            "deprecate": "Deprecated",
+            "deprecates": "Deprecated",
+            "deprecated": "Deprecated",
+        }
+
+        commit_lower = commit.lower()
+        cleaned_commit = None
+        start_word = commit_lower.split(" ")[0]
+
+        try:
+            commit_type = commit_types[start_word]
+            cleaned_commit = commit_lower.replace(start_word, "").strip().capitalize()
+            return commit_type, cleaned_commit
+        except KeyError:
+            pass
+
+        return None, None
 
     def header(self) -> str:
         return f"## {self._version} - {self._date}"
