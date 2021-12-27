@@ -245,3 +245,45 @@ class TestPost:
     def test_returns_None_if_cannot_connect_to_server(self):
         endpoint = "test"
         assert post(endpoint, "test payload") is None
+
+    @responses.activate
+    @mock.patch.dict(
+        os.environ,
+        {
+            "AUTOLOG_API_KEY": "12345",
+            "AUTOLOG_PROJECT_NAME": "Autolog",
+        },
+    )
+    @pytest.mark.parametrize("paramvalue", (5, "somestring"))
+    def test_can_add_optional_params(self, paramvalue):
+        responses.add(
+            responses.POST,
+            SERVER_DOMAIN + "test",
+            json={"message": json.dumps([1, 2, 3, 4])},
+        )
+
+        post("test", "test", params={"somekey": paramvalue})
+        call_params = responses.calls[0].request.params
+
+        assert call_params["somekey"] == str(paramvalue)
+
+    @responses.activate
+    @mock.patch.dict(
+        os.environ,
+        {
+            "AUTOLOG_API_KEY": "12345",
+            "AUTOLOG_PROJECT_NAME": "Autolog",
+        },
+    )
+    def test_can_add_multiple_params(self):
+        responses.add(
+            responses.POST,
+            SERVER_DOMAIN + "test",
+            json={"message": json.dumps([1, 2, 3, 4])},
+        )
+
+        post("test", "test", params={"somekey": 555, "anotherkey": "testparam"})
+        call_params = responses.calls[0].request.params
+
+        assert call_params["somekey"] == "555"
+        assert call_params["anotherkey"] == "testparam"

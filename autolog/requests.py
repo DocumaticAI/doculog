@@ -4,7 +4,7 @@ Call the server for intelligent changelog features.
 import hashlib
 import json
 import os
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -12,7 +12,7 @@ SERVER_DOMAIN = "https://testurl/"
 
 
 def post(
-    endpoint: str, payload: Union[str, List[str]]
+    endpoint: str, payload: Union[str, List[str]], params: Dict = {}
 ) -> Optional[Union[str, List[str]]]:
     """
     Call server with changelog info for advanced parsing features.
@@ -23,6 +23,8 @@ def post(
         The endpoint to query
     payload : str or list of str
         The data to post to the endpoint
+    params : dict of {str: Any}. Default = {}
+        Optional params to put in the request
 
     Returns
     -------
@@ -46,9 +48,14 @@ def post(
     _run_locally = (os.getenv("AUTOLOG_RUN_LOCALLY") == "True") or not api_key
     _server_domain = SERVER_DOMAIN if not _run_locally else "http://127.0.0.1:3000/"
 
+    request_url = _server_domain + endpoint + f"?project={hashed_project}"
+
+    for _param, _param_value in params.items():
+        request_url += f"&{_param}={_param_value}"
+
     try:
         response = requests.post(
-            _server_domain + endpoint + f"?project={hashed_project}",
+            request_url,
             data=json.dumps(payload),
             headers={
                 "x-api-key": api_key,
