@@ -20,6 +20,30 @@ Clone the repository
 and run `pip install -e .`
 to package locally.
 
+### API key
+
+To generate a changelog
+with a full feature-set,
+Autolog requires a (free)
+API key.
+Join the waitlist
+for an API key [here](https://www.documatic.com).
+Autolog uses `python-dotenv`
+to load environment variables
+stored in a `.env` file.
+To use your API key,
+create a `.env` file
+in your project root directory
+with the following fields:
+
+```
+AUTOLOG_API_KEY = <your-api-key>
+```
+
+**IMPORTANT: DO NOT ADD `.env` TO VERSION CONTROL.
+YOUR API KEY MUST BE KEPT SECRET.**
+
+
 ### Generate a Changelog
 
 In a terminal,
@@ -53,7 +77,14 @@ will not.
 
 ### Configuration
 
-TODO.
+You can configure how `autolog` runs
+by adding a `tool.autolog` section
+to `pyproject.toml`.
+
+| Field | Purpose | Required | Default value |
+|:------|:--------|:---------|:--------------|
+| changelog | Name of changelog file generated. ".md" suffix added if not present. | No | CHANGELOG.md |
+| local | If `true`, use a local sever for advanced features. Only used for project development | No | false |
 
 ## Developers
 
