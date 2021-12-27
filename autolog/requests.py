@@ -11,7 +11,9 @@ import requests
 SERVER_DOMAIN = "https://testurl/"
 
 
-def post(endpoint: str, payload: Union[str, List[str]]) -> Optional[Union[str, List[str]]]:
+def post(
+    endpoint: str, payload: Union[str, List[str]]
+) -> Optional[Union[str, List[str]]]:
     """
     Call server with changelog info for advanced parsing features.
 
@@ -32,20 +34,16 @@ def post(endpoint: str, payload: Union[str, List[str]]) -> Optional[Union[str, L
     -----
     * Sends a POST request to server
     * Sends HASHED project name purely for usage logging purposes
-    * 
+    *
     """
     project_name = os.getenv("AUTOLOG_PROJECT_NAME")
     project_name = project_name if project_name else "DefaultProject"
 
-    hashed_project = hashlib.sha224(
-        project_name.encode("utf-8")
-    ).hexdigest()
+    hashed_project = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
 
     api_key = os.getenv("AUTOLOG_API_KEY")
 
-    _run_locally = (
-        os.getenv("AUTOLOG_RUN_LOCALLY") == "True"
-    ) or not api_key
+    _run_locally = (os.getenv("AUTOLOG_RUN_LOCALLY") == "True") or not api_key
     _server_domain = SERVER_DOMAIN if not _run_locally else "http://127.0.0.1:3000/"
 
     try:

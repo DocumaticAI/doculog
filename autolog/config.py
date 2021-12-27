@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 def set_env_vars(vars):
     for k, v in vars.items():
-            os.environ[k] = v
+        os.environ[k] = v
 
 
 def parse_config(project_root: Path) -> Dict:
@@ -19,12 +19,10 @@ def parse_config(project_root: Path) -> Dict:
 
     DEFAULT_VARS = {
         "AUTOLOG_PROJECT_NAME": project_root.stem,
-        "AUTOLOG_RUN_LOCALLY": "false"
+        "AUTOLOG_RUN_LOCALLY": "false",
     }
 
-    DEFAULT_CONFIG = {
-        "changelog_name": "CHANGELOG.md"
-    }
+    DEFAULT_CONFIG = {"changelog_name": "CHANGELOG.md"}
 
     config_file = project_root / "pyproject.toml"
 
@@ -51,7 +49,9 @@ def parse_config(project_root: Path) -> Dict:
         local = False
 
     if "AUTOLOG_API_KEY" not in os.environ:
-        print("Environment variable AUTOLOG_API_KEY not set. Advanced features disabled.")
+        print(
+            "Environment variable AUTOLOG_API_KEY not set. Advanced features disabled."
+        )
 
     os.environ["AUTOLOG_PROJECT_NAME"] = project_name
     os.environ["AUTOLOG_RUN_LOCALLY"] = str(local)
@@ -61,7 +61,7 @@ def parse_config(project_root: Path) -> Dict:
         changelog_name = config.get("tool.autolog", "changelog")
     except NoOptionError:
         changelog_name = DEFAULT_CONFIG["changelog_name"]
- 
+
     if not changelog_name.endswith(".md"):
         changelog_name += ".md"
 

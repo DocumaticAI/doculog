@@ -68,7 +68,9 @@ def test_config_sets_project_name_environment_variable_if_set_in_config(tmp_path
     assert os.environ["AUTOLOG_PROJECT_NAME"] == "MyProject"
 
 
-def test_config_sets_project_name_as_working_directory_if_not_provided_in_config(tmp_path):
+def test_config_sets_project_name_as_working_directory_if_not_provided_in_config(
+    tmp_path,
+):
     directory = tmp_path / "someproject"
     directory.mkdir()
 
@@ -110,7 +112,9 @@ def test_config_can_read_changelog_and_appends_md_filetype(tmp_path, changelog):
     assert config == {"changelog_name": changelog + ".md"}
 
 
-@pytest.mark.parametrize("changelog", ("CHANGELOG.md", "changelog.md", "release_notes.md"))
+@pytest.mark.parametrize(
+    "changelog", ("CHANGELOG.md", "changelog.md", "release_notes.md")
+)
 def test_config_can_read_changelog_with_md_filetype(tmp_path, changelog):
     config_file = tmp_path / "pyproject.toml"
     config_file.write_text(
