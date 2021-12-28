@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from autolog.git import get_commits, list_tags
+from autolog.requests import post
 
 
 class ChangelogSection:
@@ -84,6 +85,8 @@ class ChangelogRelease:
             "Deprecated": ChangelogSection("Deprecated"),
         }
 
+        self._batched_commits = []
+
     def read(self, lines) -> None:
         for i, line in enumerate(lines):
             _line = line.lstrip("#").strip()
@@ -105,9 +108,47 @@ class ChangelogRelease:
                 commit_type, clean_commit = self.catalog_commit(title)
                 if commit_type is not None:
                     self._sections[commit_type].add_commit(clean_commit)
+                else:
+                    self.track_commit(clean_commit)
+
+        self.post_classification()
 
         for section in self._sections.keys():
             self._sections[section].remove_duplicates()
+
+    def track_commit(self, commit_update: str) -> None:
+        """
+        Track unclassified commits as a batch, then validate on a server.
+
+        To limit idle-time for the end-user, commits are processed in batch.
+
+        Parameters
+        ----------
+        commit_update : str
+            A commit message to be classfied into a Changelog section
+        """
+        self._batched_commits.append(commit_update)
+
+        if len(self._batched_commits) >= 25:
+            self.post_classification()
+
+    def post_classification(self) -> None:
+        """
+        Classify commit updates on a server.
+
+        The server contains additional and ML-driven logic for determining
+        whether a commit is a valid Changelog update.
+        If classified commits are returned, they are added to the correct section
+        in the Changelog.
+        """
+        if len(self._batched_commits) > 0:
+            if cataloged_commits := post(
+                "catalog", self._batched_commits, params={"version": self._version}
+            ):
+                for commit_type, commit_msg in cataloged_commits:
+                    self._sections[commit_type].add_commit(commit_msg)
+
+            self._batched_commits = []
 
     @staticmethod
     def catalog_commit(commit: str) -> Tuple[Optional[str], Optional[str]]:
@@ -201,9 +242,7 @@ class ChangelogRelease:
             cleaned_commit = commit_lower.replace(start_word, "").strip().capitalize()
             return commit_type, cleaned_commit
         except KeyError:
-            pass
-
-        return None, None
+            return None, commit
 
     def header(self) -> str:
         return f"## {self._version} - {self._date}"

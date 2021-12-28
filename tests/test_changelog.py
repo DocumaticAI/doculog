@@ -113,12 +113,14 @@ class TestChangelogRelease:
     @pytest.mark.parametrize(
         "firstword", ("Google", "Gazumped", "Tweet", "Did", "finally")
     )
-    def test_catalog_commit_returns_None_if_first_word_not_keyword(self, firstword):
+    def test_catalog_commit_returns_None_type_but_unaltered_commit_if_first_word_not_keyword(
+        self, firstword
+    ):
         commit = f"{firstword} a test commit"
         actual_type, actual_update = ChangelogRelease.catalog_commit(commit)
 
         assert actual_type is None
-        assert actual_update is None
+        assert actual_update == commit
 
     @pytest.mark.parametrize(
         "update_type", ("Added", "Changed", "Fixed", "Deprecated", "Removed")
