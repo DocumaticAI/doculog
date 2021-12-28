@@ -141,13 +141,19 @@ class ChangelogRelease:
         in the Changelog.
         """
         if len(self._batched_commits) > 0:
-            if cataloged_commits := post(
+            if classified_commits := post(
                 "classify", self._batched_commits, params={"version": self._version}
             ):
-                for commit_type, commit_msg in cataloged_commits:
-                    self._sections[commit_type].add_commit(commit_msg)
+                self._update_log(classified_commits)
+            else:
+                self._update_log(self._batched_commits)
 
             self._batched_commits = []
+
+    def _update_log(self, log_updates) -> None:
+        for commit_type, commit_msg in log_updates:
+            if commit_type:
+                self._sections[commit_type].add_commit(commit_msg)
 
     @staticmethod
     def catalog_commit(commit: str) -> Tuple[Optional[str], Optional[str]]:
