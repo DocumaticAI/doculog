@@ -17,6 +17,10 @@ def post(
     """
     Call server with changelog info for advanced parsing features.
 
+    If no API key in environment variables, no call if made.
+    If API key is present but environment variable is set to run locally,
+    then posts to a localhost server instead.
+
     Parameters
     ----------
     endpoint : str
@@ -36,7 +40,6 @@ def post(
     -----
     * Sends a POST request to server
     * Sends HASHED project name purely for usage logging purposes
-    *
     """
     project_name = os.getenv("AUTOLOG_PROJECT_NAME")
     project_name = project_name if project_name else "DefaultProject"
@@ -45,7 +48,10 @@ def post(
 
     api_key = os.getenv("AUTOLOG_API_KEY")
 
-    _run_locally = (os.getenv("AUTOLOG_RUN_LOCALLY") == "True") or not api_key
+    if not api_key:
+        return
+
+    _run_locally = (os.getenv("AUTOLOG_RUN_LOCALLY") == "True")
     _server_domain = SERVER_DOMAIN if not _run_locally else "http://127.0.0.1:3000/"
 
     request_url = _server_domain + endpoint + f"?project={hashed_project}"

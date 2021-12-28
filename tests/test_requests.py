@@ -186,22 +186,27 @@ class TestPost:
         os.environ,
         {
             "AUTOLOG_PROJECT_NAME": "some-proj",
-            "AUTOLOG_RUN_LOCALLY": "False",
         },
     )
-    def test_calls_local_if_run_local_is_false_but_api_key_not_set(self):
+    @pytest.mark.parametrize("local", (True, False))
+    def test_makes_no_calls_if_no_api_key(self, local):
+        os.environ["AUTOLOG_RUN_LOCALLY"] = str(local)
+
         if "AUTOLOG_API_KEY" in os.environ:
             del os.environ["AUTOLOG_API_KEY"]
 
         endpoint = "test"
         responses.add(
             responses.POST,
-            f"http://127.0.0.1:3000/{endpoint}",
-            json={"message": "test"},
+            f"http://127.0.0.1:3000/{endpoint}"
+        )
+        responses.add(
+            responses.POST,
+            SERVER_DOMAIN + endpoint
         )
 
         post(endpoint, "test payload")
-        assert len(responses.calls) == 1
+        assert len(responses.calls) == 0
 
     @responses.activate
     @mock.patch.dict(
