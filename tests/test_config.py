@@ -3,186 +3,217 @@ Unit tests for config.py
 """
 import configparser
 import os
+from unittest import mock
 
 import pytest
 
-from autolog.config import parse_config
+from autolog.config import configure_api, parse_config
 
 
-def test_can_parse_config(tmp_path):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        """
-        [tool.autolog]
-        changelog = CHANGELOG
-        """
+class TestParseConfig:
+    def test_can_parse_config(self, tmp_path):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            """
+            [tool.autolog]
+            changelog = CHANGELOG
+            """
+        )
+
+        config = parse_config(tmp_path)
+        assert config["changelog_name"] == "CHANGELOG.md"
+
+    def test_can_parse_config_with_other_sections(self, tmp_path):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            """
+            [tool.isort]
+            profile = "black"
+
+            [tool.autolog]
+            changelog = CHANGELOG
+            """
+        )
+
+        config = parse_config(tmp_path)
+        assert config["changelog_name"] == "CHANGELOG.md"
+
+    def test_can_parse_config_with_no_autolog_section(self, tmp_path):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            """
+            [tool.isort]
+            profile = "black"
+            """
+        )
+
+        config = parse_config(tmp_path)
+        assert config == {"changelog_name": "CHANGELOG.md", "local": False}
+
+    def test_can_parse_config_if_pyproject_toml_does_not_exist(self, tmp_path):
+        config = parse_config(tmp_path)
+        assert config == {"changelog_name": "CHANGELOG.md", "local": False}
+
+    def test_config_sets_project_name_environment_variable_if_set_in_config(
+        self, tmp_path
+    ):
+        (tmp_path / "pyproject.toml").write_text(
+            """
+            [tool.autolog]
+            project = "MyProject"
+            """
+        )
+
+        parse_config(tmp_path)
+        assert os.environ["AUTOLOG_PROJECT_NAME"] == "MyProject"
+
+    def test_config_sets_project_name_as_working_directory_if_not_provided_in_config(
+        self,
+        tmp_path,
+    ):
+        directory = tmp_path / "someproject"
+        directory.mkdir()
+
+        (directory / "pyproject.toml").write_text(
+            """
+            [tool.autolog]
+            changelog = "changelog"
+            """
+        )
+
+        parse_config(directory)
+        assert os.environ["AUTOLOG_PROJECT_NAME"] == "someproject"
+
+    def test_parses_config_with_no_changelog_value(self, tmp_path):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            """
+            [tool.autolog]
+            some = value
+            """
+        )
+
+        config = parse_config(tmp_path)
+        assert config["changelog_name"] == "CHANGELOG.md"
+
+    @pytest.mark.parametrize("changelog", ("CHANGELOG", "changelog", "release_notes"))
+    def test_config_can_read_changelog_and_appends_md_filetype(
+        self, tmp_path, changelog
+    ):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            f"""
+            [tool.autolog]
+            changelog = {changelog}
+            """
+        )
+
+        config = parse_config(tmp_path)
+        assert config["changelog_name"] == changelog + ".md"
+
+    @pytest.mark.parametrize(
+        "changelog", ("CHANGELOG.md", "changelog.md", "release_notes.md")
     )
+    def test_config_can_read_changelog_with_md_filetype(self, tmp_path, changelog):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            f"""
+            [tool.autolog]
+            changelog = {changelog}
+            """
+        )
 
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": "CHANGELOG.md"}
+        config = parse_config(tmp_path)
+        assert config["changelog_name"] == changelog
 
+    def test_local_is_false_if_not_provided_and_set_as_environment_variable(
+        self, tmp_path
+    ):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            """
+            [tool.autolog]
+            changelog = "changelog"
+            """
+        )
 
-def test_can_parse_config_with_other_sections(tmp_path):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        """
-        [tool.isort]
-        profile = "black"
+        config = parse_config(tmp_path)
+        assert os.environ["AUTOLOG_RUN_LOCALLY"] == "False"
 
-        [tool.autolog]
-        changelog = CHANGELOG
-        """
-    )
+    @pytest.mark.parametrize("local", ("True", "False"))
+    def test_local_can_be_read_from_config_and_set_as_environment_var(
+        self, tmp_path, local
+    ):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            f"""
+            [tool.autolog]
+            local = {local.lower()}
+            """
+        )
 
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": "CHANGELOG.md"}
+        config = parse_config(tmp_path)
+        assert os.environ["AUTOLOG_RUN_LOCALLY"] == local
 
+        # cleanup
+        os.environ["AUTOLOG_RUN_LOCALLY"] = "False"
 
-def test_can_parse_config_with_no_autolog_section(tmp_path):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        """
-        [tool.isort]
-        profile = "black"
-        """
-    )
+    def test_local_is_set_to_false_if_in_config_as_non_bool_value(self, tmp_path):
+        config_file = tmp_path / "pyproject.toml"
+        config_file.write_text(
+            """
+            [tool.autolog]
+            local = "someothervalue"
+            """
+        )
 
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": "CHANGELOG.md"}
+        config = parse_config(tmp_path)
+        assert os.environ["AUTOLOG_RUN_LOCALLY"] == "False"
 
-
-def test_can_parse_config_if_pyproject_toml_does_not_exist(tmp_path):
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": "CHANGELOG.md"}
-
-
-def test_config_sets_project_name_environment_variable_if_set_in_config(tmp_path):
-    (tmp_path / "pyproject.toml").write_text(
-        """
-        [tool.autolog]
-        project = MyProject
-        """
-    )
-
-    parse_config(tmp_path)
-    assert os.environ["AUTOLOG_PROJECT_NAME"] == "MyProject"
-
-
-def test_config_sets_project_name_as_working_directory_if_not_provided_in_config(
-    tmp_path,
-):
-    directory = tmp_path / "someproject"
-    directory.mkdir()
-
-    (directory / "pyproject.toml").write_text(
-        """
-        [tool.autolog]
-        changelog = changelog
-        """
-    )
-
-    parse_config(directory)
-    assert os.environ["AUTOLOG_PROJECT_NAME"] == "someproject"
+        # cleanup
+        os.environ["AUTOLOG_RUN_LOCALLY"] = "False"
 
 
-def test_parses_config_with_no_changelog_value(tmp_path):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        """
-        [tool.autolog]
-        some = value
-        """
-    )
+class TestValidateAPI:
+    @pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
+    def test_sets_api_key_from_env_as_env_variable_if_valid_key_and_not_running_locally(
+        self, api_key, mocker
+    ):
+        mocker.patch("autolog.config.validate_key", return_value=True)
 
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": "CHANGELOG.md"}
+        os.environ["AUTOLOG_API_KEY"] = api_key
 
+        configure_api(False)
+        assert os.environ["AUTOLOG_API_KEY"] == api_key
+        del os.environ["AUTOLOG_API_KEY"]
 
-@pytest.mark.parametrize("changelog", ("CHANGELOG", "changelog", "release_notes"))
-def test_config_can_read_changelog_and_appends_md_filetype(tmp_path, changelog):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        f"""
-        [tool.autolog]
-        changelog = {changelog}
-        """
-    )
+    @pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
+    def test_does_not_set_api_key_if_invalid_key_and_not_running_locally(
+        self, api_key, mocker
+    ):
+        mocker.patch("autolog.config.validate_key", return_value=False)
 
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": changelog + ".md"}
+        os.environ["AUTOLOG_API_KEY"] = api_key
 
+        configure_api(False)
+        assert os.getenv("AUTOLOG_API_KEY") is None
 
-@pytest.mark.parametrize(
-    "changelog", ("CHANGELOG.md", "changelog.md", "release_notes.md")
-)
-def test_config_can_read_changelog_with_md_filetype(tmp_path, changelog):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        f"""
-        [tool.autolog]
-        changelog = {changelog}
-        """
-    )
+    @pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
+    @pytest.mark.parametrize("valid_key", (True, False))
+    def test_does_sets_api_key_if_present_and_running_locally(
+        self, api_key, valid_key, mocker
+    ):
+        mocker.patch("autolog.config.validate_key", return_value=valid_key)
 
-    config = parse_config(tmp_path)
-    assert config == {"changelog_name": changelog}
+        os.environ["AUTOLOG_API_KEY"] = api_key
 
+        configure_api(True)
+        assert os.getenv("AUTOLOG_API_KEY") == api_key
+        del os.environ["AUTOLOG_API_KEY"]
 
-@pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
-def test_sets_api_key_from_env_as_env_variable(tmp_path, api_key):
-    (tmp_path / "pyproject.toml").touch()
-    (tmp_path / ".env").write_text(
-        f"""
-        AUTOLOG_API_KEY = {api_key}
-        """
-    )
+    def test_does_not_error_when_validating_key_if_no_key_present(self):
+        if "AUTOLOG_API_KEY" in os.environ:
+            del os.environ["AUTOLOG_API_KEY"]
 
-    parse_config(tmp_path)
-    assert os.environ["AUTOLOG_API_KEY"] == api_key
-    del os.environ["AUTOLOG_API_KEY"]
-
-
-def test_local_is_false_if_not_provided_and_set_as_environment_variable(tmp_path):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        """
-        [tool.autolog]
-        changelog = changelog
-        """
-    )
-
-    config = parse_config(tmp_path)
-    assert os.environ["AUTOLOG_RUN_LOCALLY"] == "False"
-
-
-@pytest.mark.parametrize("local", ("True", "False"))
-def test_local_can_be_read_from_config_and_set_as_environment_var(tmp_path, local):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        f"""
-        [tool.autolog]
-        local = {local.lower()}
-        """
-    )
-
-    config = parse_config(tmp_path)
-    assert os.environ["AUTOLOG_RUN_LOCALLY"] == local
-
-    # cleanup
-    os.environ["AUTOLOG_RUN_LOCALLY"] = "False"
-
-
-def test_local_is_set_to_false_if_in_config_as_non_bool_value(tmp_path):
-    config_file = tmp_path / "pyproject.toml"
-    config_file.write_text(
-        """
-        [tool.autolog]
-        local = someothervalue
-        """
-    )
-
-    config = parse_config(tmp_path)
-    assert os.environ["AUTOLOG_RUN_LOCALLY"] == "False"
-
-    # cleanup
-    os.environ["AUTOLOG_RUN_LOCALLY"] = "False"
+        configure_api(False)
+        assert os.getenv("AUTOLOG_API_KEY") is None

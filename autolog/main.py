@@ -4,13 +4,13 @@ CLI entrypoints to the code.
 from pathlib import Path
 
 from autolog.changelog import ChangelogDoc
-from autolog.config import parse_config
+from autolog.config import configure
 
 
 def generate_changelog():
     root = Path.cwd()
 
-    config = parse_config(root)
+    config = configure(root)
     log_path = root / config["changelog_name"]
 
     doc = ChangelogDoc(log_path)
