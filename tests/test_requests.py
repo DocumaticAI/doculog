@@ -196,14 +196,8 @@ class TestPost:
             del os.environ["AUTOLOG_API_KEY"]
 
         endpoint = "test"
-        responses.add(
-            responses.POST,
-            f"http://127.0.0.1:3000/{endpoint}"
-        )
-        responses.add(
-            responses.POST,
-            SERVER_DOMAIN + endpoint
-        )
+        responses.add(responses.POST, f"http://127.0.0.1:3000/{endpoint}")
+        responses.add(responses.POST, SERVER_DOMAIN + endpoint)
 
         post(endpoint, "test payload")
         assert len(responses.calls) == 0

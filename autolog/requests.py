@@ -51,7 +51,7 @@ def post(
     if not api_key:
         return
 
-    _run_locally = (os.getenv("AUTOLOG_RUN_LOCALLY") == "True")
+    _run_locally = os.getenv("AUTOLOG_RUN_LOCALLY") == "True"
     _server_domain = SERVER_DOMAIN if not _run_locally else "http://127.0.0.1:3000/"
 
     request_url = _server_domain + endpoint + f"?project={hashed_project}"
