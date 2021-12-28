@@ -63,6 +63,16 @@ def get_commits(since_date: Optional[str] = None, until_date: Optional[str] = No
     return commits
 
 
+def _get_tag_date(tag_name: str) -> str:
+    return (
+        subprocess.check_output(
+            ["git", "log", "-1", "--format=%ai", tag_name], stderr=subprocess.STDOUT
+        )
+        .decode("utf-8")
+        .split(" ")[0]
+    )
+
+
 def list_tags():
     tags = (
         subprocess.check_output(["git", "tag", "-n"], stderr=subprocess.STDOUT)
