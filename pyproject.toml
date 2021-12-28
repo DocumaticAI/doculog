@@ -2,5 +2,5 @@
 profile = "black"
 
 [tool.autolog]
-changelog = CHANGELOG
+changelog = "CHANGELOG"
 local = false
