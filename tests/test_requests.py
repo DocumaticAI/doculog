@@ -51,7 +51,7 @@ class TestValidateKey:
             responses.GET,
             SERVER_DOMAIN + "validate",
             status=200,
-            json={"message": json.dumps(is_valid)},
+            json={"message": is_valid},
         )
 
         assert validate_key() is is_valid

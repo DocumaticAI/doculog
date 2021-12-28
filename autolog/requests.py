@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Union
 
 import requests
 
-SERVER_DOMAIN = "https://testurl/"
+SERVER_DOMAIN = "https://av9kmkrq4f.execute-api.eu-west-2.amazonaws.com/Prod/"
 
 
 def post(
@@ -54,14 +54,15 @@ def post(
     _run_locally = os.getenv("AUTOLOG_RUN_LOCALLY") == "True"
     _server_domain = SERVER_DOMAIN if not _run_locally else "http://127.0.0.1:3000/"
 
-    request_url = _server_domain + endpoint + f"?project={hashed_project}"
+    request_url = _server_domain + endpoint
 
-    for _param, _param_value in params.items():
-        request_url += f"&{_param}={_param_value}"
+    all_params = {"project": hashed_project}
+    all_params.update(params)
 
     try:
         response = requests.post(
             request_url,
+            params=all_params,
             data=json.dumps(payload),
             headers={
                 "x-api-key": api_key,
@@ -102,12 +103,16 @@ def validate_key() -> bool:
         # Var not set or is running locally (we can't validate key/it doesn't matter)
         return False
 
-    response = requests.get(
-        SERVER_DOMAIN + f"validate?project={hashed_project}",
-        headers={"x-api-key": api_key},
-    )
+    try:
+        response = requests.get(
+            SERVER_DOMAIN + "validate",
+            params={"project": hashed_project},
+            headers={"x-api-key": api_key},
+        )
+    except requests.exceptions.ConnectionError:
+        return False
 
     if response.status_code == 200:
-        return json.loads(response.json()["message"])
+        return response.json()["message"]
     else:
         return False
