@@ -106,17 +106,14 @@ class ChangelogRelease:
         for com in commits:
             if title := com["title"]:
                 commit_type, clean_commit = self.catalog_commit(title)
-                if commit_type is not None:
-                    self._sections[commit_type].add_commit(clean_commit)
-                else:
-                    self.track_commit(clean_commit)
+                self.track_commit(commit_type, clean_commit)
 
         self.post_classification()
 
         for section in self._sections.keys():
             self._sections[section].remove_duplicates()
 
-    def track_commit(self, commit_update: str) -> None:
+    def track_commit(self, commit_type: Optional[str], commit_update: str) -> None:
         """
         Track unclassified commits as a batch, then validate on a server.
 
@@ -124,10 +121,12 @@ class ChangelogRelease:
 
         Parameters
         ----------
+        commit_type : str or None
+            Type of Changelog update. None if no type determined locally
         commit_update : str
-            A commit message to be classfied into a Changelog section
+            Commit message to be classfied into a Changelog section
         """
-        self._batched_commits.append(commit_update)
+        self._batched_commits.append((commit_type, commit_update))
 
         if len(self._batched_commits) >= 25:
             self.post_classification()
@@ -143,7 +142,7 @@ class ChangelogRelease:
         """
         if len(self._batched_commits) > 0:
             if cataloged_commits := post(
-                "catalog", self._batched_commits, params={"version": self._version}
+                "classify", self._batched_commits, params={"version": self._version}
             ):
                 for commit_type, commit_msg in cataloged_commits:
                     self._sections[commit_type].add_commit(commit_msg)
