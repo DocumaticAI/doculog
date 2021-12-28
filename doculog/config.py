@@ -8,7 +8,7 @@ from typing import Dict
 
 from dotenv import load_dotenv
 
-from autolog.requests import validate_key
+from doculog.requests import validate_key
 
 
 def set_env_vars(vars):
@@ -26,17 +26,17 @@ def configure(project_root: Path) -> Dict:
 
 def configure_api(local):
     if (not local) and (not validate_key()):
-        if "AUTOLOG_API_KEY" in os.environ:
-            print("AUTOLOG_API_KEY invalid. Advanced features disabled.")
-            del os.environ["AUTOLOG_API_KEY"]
+        if "DOCULOG_API_KEY" in os.environ:
+            print("DOCULOG_API_KEY invalid. Advanced features disabled.")
+            del os.environ["DOCULOG_API_KEY"]
 
 
 def parse_config(project_root: Path) -> Dict:
     load_dotenv(project_root / ".env")
 
     DEFAULT_VARS = {
-        "AUTOLOG_PROJECT_NAME": project_root.stem,
-        "AUTOLOG_RUN_LOCALLY": "false",
+        "DOCULOG_PROJECT_NAME": project_root.stem,
+        "DOCULOG_RUN_LOCALLY": "false",
     }
 
     DEFAULT_CONFIG = {
@@ -53,32 +53,32 @@ def parse_config(project_root: Path) -> Dict:
     config = ConfigParser()
     config.read(config_file)
 
-    if not config.has_section("tool.autolog"):
+    if not config.has_section("tool.doculog"):
         set_env_vars(DEFAULT_VARS)
         return DEFAULT_CONFIG
 
     # Environment variables
     try:
-        project_name = config.get("tool.autolog", "project").strip("'").strip('"')
+        project_name = config.get("tool.doculog", "project").strip("'").strip('"')
     except NoOptionError:
-        project_name = DEFAULT_VARS["AUTOLOG_PROJECT_NAME"]
+        project_name = DEFAULT_VARS["DOCULOG_PROJECT_NAME"]
 
     try:
-        local = config.getboolean("tool.autolog", "local")
+        local = config.getboolean("tool.doculog", "local")
     except (NoOptionError, ValueError):
         local = False
 
-    if "AUTOLOG_API_KEY" not in os.environ:
+    if "DOCULOG_API_KEY" not in os.environ:
         print(
-            "Environment variable AUTOLOG_API_KEY not set. Advanced features disabled."
+            "Environment variable DOCULOG_API_KEY not set. Advanced features disabled."
         )
 
-    os.environ["AUTOLOG_PROJECT_NAME"] = project_name
-    os.environ["AUTOLOG_RUN_LOCALLY"] = str(local)
+    os.environ["DOCULOG_PROJECT_NAME"] = project_name
+    os.environ["DOCULOG_RUN_LOCALLY"] = str(local)
 
     # Config values
     try:
-        changelog_name = config.get("tool.autolog", "changelog").strip("'").strip('"')
+        changelog_name = config.get("tool.doculog", "changelog").strip("'").strip('"')
     except NoOptionError:
         changelog_name = DEFAULT_CONFIG["changelog_name"]
 

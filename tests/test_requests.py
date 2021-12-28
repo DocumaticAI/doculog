@@ -6,14 +6,14 @@ from unittest import mock
 import pytest
 import responses
 
-from autolog.requests import SERVER_DOMAIN, post, validate_key
+from doculog.requests import SERVER_DOMAIN, post, validate_key
 
 
 class TestValidateKey:
     @responses.activate
     def test_returns_false_without_call_if_no_api_key(self):
-        if "AUTOLOG_API_KEY" in os.environ:
-            del os.environ["AUTOLOG_API_KEY"]
+        if "DOCULOG_API_KEY" in os.environ:
+            del os.environ["DOCULOG_API_KEY"]
 
         responses.add(responses.GET, SERVER_DOMAIN + "validate")
         assert validate_key() == False
@@ -21,7 +21,7 @@ class TestValidateKey:
 
     @responses.activate
     @mock.patch.dict(
-        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_RUN_LOCALLY": "True"}
+        os.environ, {"DOCULOG_API_KEY": "12345", "DOCULOG_RUN_LOCALLY": "True"}
     )
     def test_returns_false_without_call_if_running_locally(self):
         responses.add(responses.GET, SERVER_DOMAIN + "validate")
@@ -32,7 +32,7 @@ class TestValidateKey:
 
     @responses.activate
     @mock.patch.dict(
-        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_RUN_LOCALLY": "False"}
+        os.environ, {"DOCULOG_API_KEY": "12345", "DOCULOG_RUN_LOCALLY": "False"}
     )
     @pytest.mark.parametrize("code", (201, 400, 500, 404))
     def test_returns_false_if_non_200_code_returned(self, code):
@@ -43,7 +43,7 @@ class TestValidateKey:
 
     @responses.activate
     @mock.patch.dict(
-        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_RUN_LOCALLY": "False"}
+        os.environ, {"DOCULOG_API_KEY": "12345", "DOCULOG_RUN_LOCALLY": "False"}
     )
     @pytest.mark.parametrize("is_valid", (True, False))
     def test_returns_validated_response_if_status_code_200(self, is_valid):
@@ -65,8 +65,8 @@ class TestPost:
         responses.add(
             responses.POST, SERVER_DOMAIN + endpoint, json={"message": "test"}
         )
-        os.environ["AUTOLOG_API_KEY"] = "12345"
-        os.environ["AUTOLOG_PROJECT_NAME"] = "Autolog"
+        os.environ["DOCULOG_API_KEY"] = "12345"
+        os.environ["DOCULOG_PROJECT_NAME"] = "doculog"
 
         post(endpoint, "test payload")
 
@@ -77,9 +77,9 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "Autolog",
-            "AUTOLOG_RUN_LOCALLY": "False",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "doculog",
+            "DOCULOG_RUN_LOCALLY": "False",
         },
     )
     def test_receives_and_parses_list(self):
@@ -96,9 +96,9 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "Autolog",
-            "AUTOLOG_RUN_LOCALLY": "False",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "doculog",
+            "DOCULOG_RUN_LOCALLY": "False",
         },
     )
     def test_receives_and_parses_string(self):
@@ -115,9 +115,9 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "Autolog",
-            "AUTOLOG_RUN_LOCALLY": "False",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "doculog",
+            "DOCULOG_RUN_LOCALLY": "False",
         },
     )
     def test_receives_and_parses_dict(self):
@@ -141,8 +141,8 @@ class TestPost:
         responses.add(
             responses.POST, SERVER_DOMAIN + endpoint, json={"message": "test"}
         )
-        os.environ["AUTOLOG_API_KEY"] = "12345"
-        os.environ["AUTOLOG_PROJECT_NAME"] = project_name
+        os.environ["DOCULOG_API_KEY"] = "12345"
+        os.environ["DOCULOG_PROJECT_NAME"] = project_name
 
         expected_hash = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
 
@@ -154,8 +154,8 @@ class TestPost:
 
     @responses.activate
     def test_posted_with_hashed_project_default_if_env_var_not_set(self):
-        if "AUTOLOG_PROJECT_NAME" in os.environ:
-            del os.environ["AUTOLOG_PROJECT_NAME"]
+        if "DOCULOG_PROJECT_NAME" in os.environ:
+            del os.environ["DOCULOG_PROJECT_NAME"]
 
         endpoint = "test"
 
@@ -177,8 +177,8 @@ class TestPost:
         responses.add(
             responses.POST, SERVER_DOMAIN + endpoint, json={"message": "test"}
         )
-        os.environ["AUTOLOG_API_KEY"] = "12345"
-        os.environ["AUTOLOG_PROJECT_NAME"] = "some-project"
+        os.environ["DOCULOG_API_KEY"] = "12345"
+        os.environ["DOCULOG_PROJECT_NAME"] = "some-project"
 
         post(endpoint, ["some", "data"])
         assert len(responses.calls) == 1
@@ -189,8 +189,8 @@ class TestPost:
         responses.add(
             responses.POST, SERVER_DOMAIN + endpoint, json={"message": "test"}
         )
-        os.environ["AUTOLOG_API_KEY"] = "12345"
-        os.environ["AUTOLOG_PROJECT_NAME"] = "some-project"
+        os.environ["DOCULOG_API_KEY"] = "12345"
+        os.environ["DOCULOG_PROJECT_NAME"] = "some-project"
 
         post(endpoint, "import json\n\nclass A:\npass")
         assert len(responses.calls) == 1
@@ -202,8 +202,8 @@ class TestPost:
         responses.add(
             responses.POST, SERVER_DOMAIN + endpoint, json={"message": "test"}
         )
-        os.environ["AUTOLOG_API_KEY"] = api_key
-        os.environ["AUTOLOG_PROJECT_NAME"] = "MyProject"
+        os.environ["DOCULOG_API_KEY"] = api_key
+        os.environ["DOCULOG_PROJECT_NAME"] = "MyProject"
 
         post(endpoint, "test payload")
         actual_request = responses.calls[0].request
@@ -214,9 +214,9 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "some-proj",
-            "AUTOLOG_RUN_LOCALLY": "True",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "some-proj",
+            "DOCULOG_RUN_LOCALLY": "True",
         },
     )
     def test_calls_local_host_if_env_var_set_to_true(self):
@@ -234,15 +234,15 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_PROJECT_NAME": "some-proj",
+            "DOCULOG_PROJECT_NAME": "some-proj",
         },
     )
     @pytest.mark.parametrize("local", (True, False))
     def test_makes_no_calls_if_no_api_key(self, local):
-        os.environ["AUTOLOG_RUN_LOCALLY"] = str(local)
+        os.environ["DOCULOG_RUN_LOCALLY"] = str(local)
 
-        if "AUTOLOG_API_KEY" in os.environ:
-            del os.environ["AUTOLOG_API_KEY"]
+        if "DOCULOG_API_KEY" in os.environ:
+            del os.environ["DOCULOG_API_KEY"]
 
         endpoint = "test"
         responses.add(responses.POST, f"http://127.0.0.1:3000/{endpoint}")
@@ -255,9 +255,9 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "some-proj",
-            "AUTOLOG_RUN_LOCALLY": "False",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "some-proj",
+            "DOCULOG_RUN_LOCALLY": "False",
         },
     )
     def test_calls_server_if_env_var_set_to_false(self):
@@ -271,7 +271,7 @@ class TestPost:
 
     @responses.activate
     @mock.patch.dict(
-        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_PROJECT_NAME": "some-proj"}
+        os.environ, {"DOCULOG_API_KEY": "12345", "DOCULOG_PROJECT_NAME": "some-proj"}
     )
     def test_calls_server_if_env_var_not_set(self):
         endpoint = "test"
@@ -285,9 +285,9 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "some-proj",
-            "AUTOLOG_RUN_LOCALLY": "True",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "some-proj",
+            "DOCULOG_RUN_LOCALLY": "True",
         },
     )
     def test_returns_None_if_cannot_connect_to_server(self):
@@ -298,8 +298,8 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "Autolog",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "doculog",
         },
     )
     @pytest.mark.parametrize("paramvalue", (5, "somestring"))
@@ -319,8 +319,8 @@ class TestPost:
     @mock.patch.dict(
         os.environ,
         {
-            "AUTOLOG_API_KEY": "12345",
-            "AUTOLOG_PROJECT_NAME": "Autolog",
+            "DOCULOG_API_KEY": "12345",
+            "DOCULOG_PROJECT_NAME": "doculog",
         },
     )
     def test_can_add_multiple_params(self):

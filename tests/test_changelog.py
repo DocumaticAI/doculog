@@ -1,6 +1,6 @@
 import pytest
 
-from autolog.changelog import ChangelogRelease, ChangelogSection
+from doculog.changelog import ChangelogRelease, ChangelogSection
 
 
 class TestChangelogSection:
@@ -65,7 +65,7 @@ class TestChangelogSection:
 class TestChangelogRelease:
     def test_generate_gets_commits_up_to_release_date(self, mocker):
         get_commits_mock = mocker.patch(
-            "autolog.changelog.get_commits", return_value=[]
+            "doculog.changelog.get_commits", return_value=[]
         )
 
         release = ChangelogRelease("0.1.0", "2021-12-25")

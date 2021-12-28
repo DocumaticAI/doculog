@@ -3,8 +3,8 @@ CLI entrypoints to the code.
 """
 from pathlib import Path
 
-from autolog.changelog import ChangelogDoc
-from autolog.config import configure
+from doculog.changelog import ChangelogDoc
+from doculog.config import configure
 
 
 def generate_changelog():

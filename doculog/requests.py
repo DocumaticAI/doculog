@@ -41,17 +41,17 @@ def post(
     * Sends a POST request to server
     * Sends HASHED project name purely for usage logging purposes
     """
-    project_name = os.getenv("AUTOLOG_PROJECT_NAME")
+    project_name = os.getenv("DOCULOG_PROJECT_NAME")
     project_name = project_name if project_name else "DefaultProject"
 
     hashed_project = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
 
-    api_key = os.getenv("AUTOLOG_API_KEY")
+    api_key = os.getenv("DOCULOG_API_KEY")
 
     if not api_key:
         return
 
-    _run_locally = os.getenv("AUTOLOG_RUN_LOCALLY") == "True"
+    _run_locally = os.getenv("DOCULOG_RUN_LOCALLY") == "True"
     _server_domain = SERVER_DOMAIN if not _run_locally else "http://127.0.0.1:3000/"
 
     request_url = _server_domain + endpoint
@@ -89,17 +89,17 @@ def post(
 
 def validate_key() -> bool:
     """Validate a user's API key by querying the server."""
-    project_name = os.getenv("AUTOLOG_PROJECT_NAME")
+    project_name = os.getenv("DOCULOG_PROJECT_NAME")
     project_name = project_name if project_name else "DefaultProject"
 
     hashed_project = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
 
-    api_key = os.getenv("AUTOLOG_API_KEY")
+    api_key = os.getenv("DOCULOG_API_KEY")
 
     if not api_key:
         return False
 
-    if os.getenv("AUTOLOG_RUN_LOCALLY") != "False":
+    if os.getenv("DOCULOG_RUN_LOCALLY") != "False":
         # Var not set or is running locally (we can't validate key/it doesn't matter)
         return False
 

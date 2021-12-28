@@ -5,8 +5,8 @@ import re
 from pathlib import Path
 from typing import Optional, Tuple
 
-from autolog.git import get_commits, list_tags
-from autolog.requests import post
+from doculog.git import get_commits, list_tags
+from doculog.requests import post
 
 
 class ChangelogSection:

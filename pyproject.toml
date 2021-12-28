@@ -1,6 +1,6 @@
 [tool.isort]
 profile = "black"
 
-[tool.autolog]
+[tool.doculog]
 changelog = "CHANGELOG"
 local = true
