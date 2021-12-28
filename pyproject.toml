@@ -3,4 +3,4 @@ profile = "black"
 
 [tool.autolog]
 changelog = "CHANGELOG"
-local = false
+local = true
