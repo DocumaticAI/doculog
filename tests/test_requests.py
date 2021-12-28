@@ -6,7 +6,56 @@ from unittest import mock
 import pytest
 import responses
 
-from autolog.requests import SERVER_DOMAIN, post
+from autolog.requests import SERVER_DOMAIN, post, validate_key
+
+
+class TestValidateKey:
+    @responses.activate
+    def test_returns_false_without_call_if_no_api_key(self):
+        if "AUTOLOG_API_KEY" in os.environ:
+            del os.environ["AUTOLOG_API_KEY"]
+
+        responses.add(responses.GET, SERVER_DOMAIN + "validate")
+        assert validate_key() == False
+        assert len(responses.calls) == 0
+
+    @responses.activate
+    @mock.patch.dict(
+        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_RUN_LOCALLY": "True"}
+    )
+    def test_returns_false_without_call_if_running_locally(self):
+        responses.add(responses.GET, SERVER_DOMAIN + "validate")
+        responses.add(responses.GET, "http://127.0.0.1:3000/validate")
+
+        assert validate_key() == False
+        assert len(responses.calls) == 0
+
+    @responses.activate
+    @mock.patch.dict(
+        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_RUN_LOCALLY": "False"}
+    )
+    @pytest.mark.parametrize("code", (201, 400, 500, 404))
+    def test_returns_false_if_non_200_code_returned(self, code):
+        responses.add(responses.GET, SERVER_DOMAIN + "validate", status=code)
+
+        assert validate_key() == False
+        assert len(responses.calls) == 1
+
+    @responses.activate
+    @mock.patch.dict(
+        os.environ, {"AUTOLOG_API_KEY": "12345", "AUTOLOG_RUN_LOCALLY": "False"}
+    )
+    @pytest.mark.parametrize("is_valid", (True, False))
+    def test_returns_validated_response_if_status_code_200(self, is_valid):
+        responses.add(
+            responses.GET,
+            SERVER_DOMAIN + "validate",
+            status=200,
+            json={"message": json.dumps(is_valid)},
+        )
+
+        assert validate_key() is is_valid
+        assert len(responses.calls) == 1
 
 
 class TestPost:

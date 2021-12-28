@@ -84,3 +84,30 @@ def post(
         return message
     else:
         return None
+
+
+def validate_key() -> bool:
+    """Validate a user's API key by querying the server."""
+    project_name = os.getenv("AUTOLOG_PROJECT_NAME")
+    project_name = project_name if project_name else "DefaultProject"
+
+    hashed_project = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
+
+    api_key = os.getenv("AUTOLOG_API_KEY")
+
+    if not api_key:
+        return False
+
+    if os.getenv("AUTOLOG_RUN_LOCALLY") != "False":
+        # Var not set or is running locally (we can't validate key/it doesn't matter)
+        return False
+
+    response = requests.get(
+        SERVER_DOMAIN + f"validate?project={hashed_project}",
+        headers={"x-api-key": api_key},
+    )
+
+    if response.status_code == 200:
+        return json.loads(response.json()["message"])
+    else:
+        return False
