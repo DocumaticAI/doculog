@@ -5,12 +5,16 @@ _README generated with **Documatic**_.
 Quickly generate changelogs
 and release notes
 by analysing your git history.
-A python tool.
-Format based on `KeepAChangelog`.
+A python tool
+which works on any language.
 
 ## Getting started
 
 ### Requirements
+
+* python >= 3.8
+* git
+* good* commit messages
 
 Minimum python 3.8.
 Project actively supports python 3.8,
@@ -22,6 +26,25 @@ and run `pip install -e .`
 to package locally
 OR
 `pip install doculog`.
+
+`Doculog` works by reading git commit messages
+and inferring what changes are being made.
+It assumes that you are writing
+your commit messages as actions:
+e.g. "_Add_ some feature",
+"_Fix_ a particular bug".
+While it's good practice to have the action
+in the present,
+imperitive tense,
+`doculog` accepts past verbs.
+Standard `doculog` looks through a list
+of expected verbs
+(open an issue/contribute a PR if there are some missing!),
+but the [extended version](#api-key)
+includes additional logic
+for classifying commit message,
+which allows you to be more lax
+with your commit messages.
 
 ### API key
 
