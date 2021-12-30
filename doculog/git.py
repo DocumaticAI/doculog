@@ -3,22 +3,49 @@ Utility code for parsing git history.
 """
 import re
 import subprocess
-from typing import Optional
+from typing import List, Optional, Tuple
 
 leading_4_spaces = re.compile("^    ")
 
 
-def get_commits(since_date: Optional[str] = None, until_date: Optional[str] = None):
+def get_commits(
+    since_date: Optional[str] = None, until_date: Optional[str] = None
+) -> List:
+    """
+    Get commit information (title, author, files changes etc.)
+
+    Optionally get the commits between given dates.
+    Retrieve the entire git history if only 0 or 1 dates are given.
+
+    Parameters
+    ----------
+    since_date : str, default = None
+        If provided (and `until_date` is provided), the beginning of the date range
+        in which to retrieve commits
+    until_date : str, default = None
+        If provided (and `since_date` is provided), the end of the date range
+        in which to retrieve commits
+
+    Returns
+    -------
+    list of dicts
+        List of commit information (in the date range if given),
+        earliest commits first.
+        Commit information is a dict containing "title", "date", "files" and more.
+    """
     if since_date and until_date:
         command = ["git", "log", "--stat", "--since", since_date, "--until", until_date]
     else:
         command = ["git", "log", "--stat"]
 
-    lines = (
-        subprocess.check_output(command, stderr=subprocess.STDOUT)
-        .decode("utf-8")
-        .split("\n")
-    )
+    try:
+        lines = (
+            subprocess.check_output(command, stderr=subprocess.STDOUT)
+            .decode("utf-8")
+            .split("\n")
+        )
+    except subprocess.CalledProcessError:
+        return []
 
     commits = []
     current_commit = {}
@@ -73,14 +100,34 @@ def _get_tag_date(tag_name: str) -> str:
     )
 
 
-def list_tags():
-    tags = (
-        subprocess.check_output(["git", "tag", "-n"], stderr=subprocess.STDOUT)
-        .decode("utf-8")
-        .split("\n")
-    )
-    tags.reverse()
+def list_tags() -> List[Tuple[str, str]]:
+    """
+    List tags of git project.
+
+    Returns
+    -------
+    list of (str, str)
+        List of (tag title, tag date) present in the git project
+    """
+    try:
+        tags = (
+            subprocess.check_output(["git", "tag", "-n"], stderr=subprocess.STDOUT)
+            .decode("utf-8")
+            .split("\n")
+        )
+        tags.reverse()
+    except subprocess.CalledProcessError:
+        return []
 
     tags = [t.split(" ")[0] for t in tags]
     tags = [(t, _get_tag_date(t)) for t in tags if t]
     return tags
+
+
+def has_git() -> bool:
+    try:
+        subprocess.check_output(["git", "log"], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
