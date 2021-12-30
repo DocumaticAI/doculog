@@ -16,4 +16,6 @@ def generate_changelog():
     doc = ChangelogDoc(log_path)
     doc.generate()
     doc.save()
-    print(f"Saved changelog to {log_path}")
+
+    if log_path.exists():
+        print(f"Saved changelog to {log_path}")

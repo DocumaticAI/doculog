@@ -1,6 +1,6 @@
 import pytest
 
-from doculog.changelog import ChangelogRelease, ChangelogSection
+from doculog.changelog import ChangelogDoc, ChangelogRelease, ChangelogSection
 
 
 class TestChangelogSection:
@@ -178,3 +178,25 @@ class TestChangelogRelease:
 
         for _section in release._sections.values():
             assert _section._commits == []
+
+
+class TestChangelogDoc:
+    def test_saves_if_git_enabled(self, tmp_path, mocker):
+        mocker.patch("doculog.changelog.has_git", return_value=True)
+        mocker.patch("doculog.changelog.list_tags", return_value=[])
+
+        doc_path = tmp_path / "changelog.md"
+        doc = ChangelogDoc(doc_path)
+        doc.save()
+
+        assert doc_path.exists()
+
+    def test_does_not_save_if_git_not_enabled(self, tmp_path, mocker):
+        mocker.patch("doculog.changelog.has_git", return_value=False)
+        mocker.patch("doculog.changelog.list_tags", return_value=[])
+
+        doc_path = tmp_path / "changelog.md"
+        doc = ChangelogDoc(doc_path)
+        doc.save()
+
+        assert not doc_path.exists()
