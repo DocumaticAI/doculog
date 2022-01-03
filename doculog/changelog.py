@@ -271,8 +271,10 @@ class ChangelogUnreleased(ChangelogRelease):
     """
 
     def __init__(self) -> None:
-        # Use some far future date to get all unrelesaed commits
-        super().__init__("Unreleased", "2100-12-31")
+        # Use some far future date to get all unreleased commits
+        # Some dates, e.g. 2100-12-31, yield 0 commits.
+        # TODO: Need to work out why
+        super().__init__("Unreleased", "2099-01-01")
 
     def header(self) -> str:
         return f"## {self._version}"
