@@ -5,8 +5,8 @@ _README generated with **Documatic**_.
 Quickly generate changelogs
 and release notes
 by analysing your git history.
-A python tool
-which works on any language.
+A tool written in python,
+but works on any language.
 
 ## Getting started
 
@@ -14,7 +14,8 @@ which works on any language.
 
 * python >= 3.8
 * git
-* good* commit messages
+* "good" commit messages
+* Git version tags
 
 Minimum python 3.8.
 Project actively supports python 3.8,
@@ -37,6 +38,9 @@ While it's good practice to have the action
 in the present,
 imperitive tense,
 `doculog` accepts past verbs.
+See [git best practices](https://cbea.ms/git-commit/#imperative)
+for more information
+on this git commit writing style.
 Standard `doculog` looks through a list
 of expected verbs
 (open an issue/contribute a PR if there are some missing!),
@@ -53,8 +57,14 @@ with a full feature-set,
 doculog requires a (free)
 API key.
 Join the waitlist
-for an API key [here](https://www.documatic.com).
-doculog uses `python-dotenv`
+for an API key
+by signing up [here](https://www.documatic.com).
+Someone will be in touch with your API key.
+In the meantime,
+doculog **works without an API key**
+(you just won't have access to advanced features).
+
+`doculog` uses `python-dotenv`
 to load environment variables
 stored in a `.env` file.
 To use your API key,
@@ -78,9 +88,33 @@ to create
 a `CHANGELOG.md`
 from your git commit history,
 or update an existing changelog.
-See [configuration](#configuration)
-for information on how to configure
-the changelog.
+The "Unreleased" section corresponds to updates
+not attached to a version.
+Each changelog update version
+may contain the following sections:
+"Added",
+"Removed",
+"Deprecated",
+"Fixed",
+"Changed".
+Each section header will only appear
+in the version
+if it has at least one update.
+**Note:** `doculog` will overwrite changes made
+to the "Unreleased" section
+every time it is run,
+however tagged versions are not overwritten.
+Therefore,
+you can manually edit
+and add updates
+to a version release.
+
+To get the best out of the changelog,
+read the concepts below
+for information on
+[configuration](#configuration),
+[git commits](#git-commit-parsing)
+and [version tags](#version-tags).
 
 ## Concepts
 
@@ -101,6 +135,26 @@ will get interpreted as a "Changed" feature.
 Whereas `'my_func' -> 'my_awesome_func'`
 will not.
 
+### Version tags
+
+Changelogs break down your project's featureset
+by each release.
+Currently,
+`doculog` infers a release has been made
+by reading the git tags of your project.
+If you don't have any git tags,
+your changelog will only have an "Unreleased" section.
+To make a git tag,
+run `git tag -a v<MAJOR>-<MINOR>-<PATCH>`
+(and `git push --tags` to push to your remote);
+This assumes you're using [semver](https://www.mariokandut.com/what-is-semantic-versioning-semver/)
+versioning system.
+
+**Note:** not using semver or git tags to release your project?
+Open an issue on the `doculog` repo
+detailing your method to get it supported
+by `doculog`.
+
 ### Configuration
 
 You can configure how `doculog` runs
@@ -110,7 +164,17 @@ to `pyproject.toml`.
 | Field | Purpose | Required | Default value |
 |:------|:--------|:---------|:--------------|
 | changelog | Name of changelog file generated. ".md" suffix added if not present. | No | CHANGELOG.md |
+| project | The name of your project. Used to title the changelog | No | The name of your root project folder |
 | local | If `true`, use a local sever for advanced features. Only used for project development | No | false |
+
+For example,
+your `pyproject.toml` file _might_ be:
+
+```
+[tool.doculog]
+changelog = "CHANGELOG"
+project = "My Cool Project"
+```
 
 ## Developers
 
@@ -138,9 +202,28 @@ to stay up to date
 with the latest features
 and releases.
 
-### The changelog is great, but I want more.
+### How do I get my API key?
 
-Get in touch.
+Once you've joined the waitlist,
+we will be in touch shortly
+with your API key.
+
+### The changelog is great, but I want more!
+
+Get in touch - `info@documatic.com`.
+
+### I'm not getting a complete changelog. What's gone wrong?
+
+Check that you have appropriate [version tags](#version-tags)
+and [commit messages](#git-commit-parsing).
+If you have the advanced featureset
+(i.e. have an API key)
+then you will get better changelog updates
+which don't require you to follow
+the commit process
+so strictly.
+If you're still not getting good results,
+please open a bug report.
 
 ### Can I contribute to doculog?
 
