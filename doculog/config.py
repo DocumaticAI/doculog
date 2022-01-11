@@ -78,7 +78,9 @@ def parse_config(project_root: Path) -> Dict:
         )
 
     if "DOCULOG_API_KEY" in os.environ:
-        print("DOCULOG_API_KEY is deprecated and will be removed in v0.2.0. Use DOCUMATIC_API_KEY environment variable to set your api key instead.")
+        print(
+            "DOCULOG_API_KEY is deprecated and will be removed in v0.2.0. Use DOCUMATIC_API_KEY environment variable to set your api key instead."
+        )
 
     os.environ["DOCULOG_PROJECT_NAME"] = project_name
     os.environ["DOCULOG_RUN_LOCALLY"] = str(local)
