@@ -257,7 +257,7 @@ class ChangelogRelease:
 
         for section in self._sections.values():
             if section.has_content():
-                content += str(section) + "\n\n"
+                content += str(section).strip() + "\n\n"
 
         return content
 
@@ -394,13 +394,15 @@ class ChangelogDoc:
         )
 
         if "Unreleased" in self._releases:
-            content += str(self._releases["Unreleased"])
+            content += str(self._releases["Unreleased"]).strip()
 
         for tag_name, _ in self._tags:
             vless_tag_name = tag_name.lstrip("v").strip()
 
             if vless_tag_name in self._releases:
-                content += "\n\n" + str(self._releases[vless_tag_name])
+                content += "\n\n" + str(self._releases[vless_tag_name]).strip()
+
+        content += "\n"  # newline at end of file
 
         return content
 
