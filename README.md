@@ -73,7 +73,7 @@ in your project root directory
 with the following fields:
 
 ```
-DOCULOG_API_KEY = <your-api-key>
+DOCUMATIC_API_KEY = <your-api-key>
 ```
 
 **IMPORTANT: DO NOT ADD `.env` TO VERSION CONTROL.
