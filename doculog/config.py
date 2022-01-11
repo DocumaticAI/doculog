@@ -26,6 +26,10 @@ def configure(project_root: Path) -> Dict:
 
 def configure_api(local):
     if (not local) and (not validate_key()):
+        if "DOCUMATIC_API_KEY" in os.environ:
+            print("DOCUMATIC_API_KEY invalid. Advanced features disabled")
+            del os.environ["DOCUMATIC_API_KEY"]
+
         if "DOCULOG_API_KEY" in os.environ:
             print("DOCULOG_API_KEY invalid. Advanced features disabled.")
             del os.environ["DOCULOG_API_KEY"]
@@ -68,9 +72,9 @@ def parse_config(project_root: Path) -> Dict:
     except (NoOptionError, ValueError):
         local = False
 
-    if "DOCULOG_API_KEY" not in os.environ:
+    if "DOCUMATIC_API_KEY" not in os.environ and "DOCULOG_API_KEY" not in os.environ:
         print(
-            "Environment variable DOCULOG_API_KEY not set. Advanced features disabled."
+            "Environment variable DOCUMATIC_API_KEY not set. Advanced features disabled."
         )
 
     os.environ["DOCULOG_PROJECT_NAME"] = project_name

@@ -176,44 +176,48 @@ class TestParseConfig:
 
 class TestValidateAPI:
     @pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
+    @pytest.mark.parametrize("key_name", ("DOCULOG", "DOCUMATIC"))
     def test_sets_api_key_from_env_as_env_variable_if_valid_key_and_not_running_locally(
-        self, api_key, mocker
+        self, api_key, mocker, key_name
     ):
         mocker.patch("doculog.config.validate_key", return_value=True)
 
-        os.environ["DOCULOG_API_KEY"] = api_key
+        os.environ[f"{key_name}_API_KEY"] = api_key
 
         configure_api(False)
-        assert os.environ["DOCULOG_API_KEY"] == api_key
-        del os.environ["DOCULOG_API_KEY"]
+        assert os.environ[f"{key_name}_API_KEY"] == api_key
+        del os.environ[f"{key_name}_API_KEY"]
 
     @pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
+    @pytest.mark.parametrize("key_name", ("DOCULOG", "DOCUMATIC"))
     def test_does_not_set_api_key_if_invalid_key_and_not_running_locally(
-        self, api_key, mocker
+        self, api_key, mocker, key_name
     ):
         mocker.patch("doculog.config.validate_key", return_value=False)
 
-        os.environ["DOCULOG_API_KEY"] = api_key
+        os.environ[f"{key_name}_API_KEY"] = api_key
 
         configure_api(False)
-        assert os.getenv("DOCULOG_API_KEY") is None
+        assert os.getenv(f"{key_name}_API_KEY") is None
 
     @pytest.mark.parametrize("api_key", ("12345", "a2b3CDE199", "test"))
     @pytest.mark.parametrize("valid_key", (True, False))
+    @pytest.mark.parametrize("key_name", ("DOCULOG", "DOCUMATIC"))
     def test_does_sets_api_key_if_present_and_running_locally(
-        self, api_key, valid_key, mocker
+        self, api_key, valid_key, mocker, key_name
     ):
         mocker.patch("doculog.config.validate_key", return_value=valid_key)
 
-        os.environ["DOCULOG_API_KEY"] = api_key
+        os.environ[f"{key_name}_API_KEY"] = api_key
 
         configure_api(True)
-        assert os.getenv("DOCULOG_API_KEY") == api_key
-        del os.environ["DOCULOG_API_KEY"]
+        assert os.getenv(f"{key_name}_API_KEY") == api_key
+        del os.environ[f"{key_name}_API_KEY"]
 
-    def test_does_not_error_when_validating_key_if_no_key_present(self):
-        if "DOCULOG_API_KEY" in os.environ:
-            del os.environ["DOCULOG_API_KEY"]
+    @pytest.mark.parametrize("key_name", ("DOCULOG", "DOCUMATIC"))
+    def test_does_not_error_when_validating_key_if_no_key_present(self, key_name):
+        if f"{key_name}_API_KEY" in os.environ:
+            del os.environ[f"{key_name}_API_KEY"]
 
         configure_api(False)
-        assert os.getenv("DOCULOG_API_KEY") is None
+        assert os.getenv(f"{key_name}_API_KEY") is None

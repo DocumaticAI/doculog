@@ -46,7 +46,7 @@ def post(
 
     hashed_project = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
 
-    api_key = os.getenv("DOCULOG_API_KEY")
+    api_key = os.getenv("DOCUMATIC_API_KEY") or os.getenv("DOCULOG_API_KEY")
 
     if not api_key:
         return
@@ -94,7 +94,7 @@ def validate_key() -> bool:
 
     hashed_project = hashlib.sha224(project_name.encode("utf-8")).hexdigest()
 
-    api_key = os.getenv("DOCULOG_API_KEY")
+    api_key = os.getenv("DOCUMATIC_API_KEY") or os.getenv("DOCULOG_API_KEY")
 
     if not api_key:
         return False
