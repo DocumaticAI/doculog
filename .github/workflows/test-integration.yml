@@ -24,6 +24,8 @@ jobs:
           pip install .
       - name: Run end-to-end test on self
         run: |
+          rm CHANGELOG.md
           doculog
           [ -s CHANGELOG.md ] || (echo "Changelog is empty" && exit 1)
+          if [[ $(wc -l <CHANGELOG.md) -le 20 ]] ; then echo "Did not generate useful changelog" && exit 1 ;fi
         shell: bash
