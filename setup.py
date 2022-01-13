@@ -12,4 +12,9 @@ def get_version():
 
 setup(
     version=get_version(),
+    entry_points={
+        "console_scripts": [
+            "doculog=doculog.main:generate_changelog",
+        ]
+    },
 )
