@@ -24,6 +24,8 @@ jobs:
           pip install .
       - name: Run end-to-end test on self
         run: |
+          rm CHANGELOG.md
           doculog
-          [ -s CHANGELOG.md ] || (echo "Changelog is empty" && exit 1)
+          cat CHANGELOG.md
+          [ -s CHANGELOG.md ] || (echo "Changelog is empty or non-existent" && exit 1)
         shell: bash

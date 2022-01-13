@@ -1,11 +1,38 @@
 """
 Utility code for parsing git history.
 """
+import os
 import re
 import subprocess
+import sys
 from typing import List, Optional, Tuple
 
 leading_4_spaces = re.compile("^    ")
+
+
+def _get_git_command() -> str:
+    if sys.platform.startswith("win"):
+        path = os.environ.get("PATH", "").split(os.pathsep)
+        path_exts = os.environ.get("PATHEXT", ".exe;.bat;.cmd").split(";")
+        has_ext = os.path.splitext("git")[1] in path_exts
+        if not has_ext:
+            exts = path_exts
+        else:
+            # Don't try to append any extensions
+            exts = [""]
+
+        for d in path:
+            try:
+                for ext in exts:
+                    exepath = os.path.join(d, "git" + ext)
+                    if os.access(exepath, os.X_OK):
+                        return exepath
+            except OSError:
+                pass
+
+        return "git.cmd"
+    else:
+        return "git"
 
 
 def get_commits(
@@ -34,13 +61,21 @@ def get_commits(
         Commit information is a dict containing "title", "date", "files" and more.
     """
     if since_date and until_date:
-        command = ["git", "log", "--stat", "--since", since_date, "--until", until_date]
+        command = [
+            _get_git_command(),
+            "log",
+            "--stat",
+            "--since",
+            since_date,
+            "--until",
+            until_date,
+        ]
     else:
-        command = ["git", "log", "--stat"]
+        command = [_get_git_command(), "log", "--stat"]
 
     try:
         lines = (
-            subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+            subprocess.check_output(command, stderr=subprocess.STDOUT)
             .decode("utf-8")
             .split("\n")
         )
@@ -93,9 +128,8 @@ def get_commits(
 def _get_tag_date(tag_name: str) -> str:
     return (
         subprocess.check_output(
-            ["git", "log", "-1", "--format=%ai", tag_name],
+            [_get_git_command(), "log", "-1", "--format=%ai", tag_name],
             stderr=subprocess.STDOUT,
-            shell=True,
         )
         .decode("utf-8")
         .split(" ")[0]
@@ -114,13 +148,13 @@ def list_tags() -> List[Tuple[str, str]]:
     try:
         tags = (
             subprocess.check_output(
-                ["git", "tag", "-n"], stderr=subprocess.STDOUT, shell=True
+                [_get_git_command(), "tag", "-n"], stderr=subprocess.STDOUT
             )
             .decode("utf-8")
             .split("\n")
         )
         tags.reverse()
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         return []
 
     tags = [t.split(" ")[0] for t in tags]
@@ -130,7 +164,7 @@ def list_tags() -> List[Tuple[str, str]]:
 
 def has_git() -> bool:
     try:
-        subprocess.check_output(["git", "log"], stderr=subprocess.STDOUT, shell=True)
+        subprocess.check_output([_get_git_command(), "log"], stderr=subprocess.STDOUT)
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
     else:
