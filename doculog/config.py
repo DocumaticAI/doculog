@@ -36,6 +36,7 @@ def configure_api(local):
 
 
 def parse_config(project_root: Path) -> Dict:
+    print(f"Reading environment variables from {project_root / '.env.'}")
     load_dotenv(project_root / ".env")
 
     DEFAULT_VARS = {
