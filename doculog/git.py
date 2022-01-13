@@ -40,7 +40,7 @@ def get_commits(
 
     try:
         lines = (
-            subprocess.check_output(command, stderr=subprocess.STDOUT)
+            subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
             .decode("utf-8")
             .split("\n")
         )
@@ -93,7 +93,9 @@ def get_commits(
 def _get_tag_date(tag_name: str) -> str:
     return (
         subprocess.check_output(
-            ["git", "log", "-1", "--format=%ai", tag_name], stderr=subprocess.STDOUT
+            ["git", "log", "-1", "--format=%ai", tag_name],
+            stderr=subprocess.STDOUT,
+            shell=True,
         )
         .decode("utf-8")
         .split(" ")[0]
@@ -111,7 +113,9 @@ def list_tags() -> List[Tuple[str, str]]:
     """
     try:
         tags = (
-            subprocess.check_output(["git", "tag", "-n"], stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                ["git", "tag", "-n"], stderr=subprocess.STDOUT, shell=True
+            )
             .decode("utf-8")
             .split("\n")
         )
@@ -126,8 +130,8 @@ def list_tags() -> List[Tuple[str, str]]:
 
 def has_git() -> bool:
     try:
-        subprocess.check_output(["git", "log"], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError:
+        subprocess.check_output(["git", "log"], stderr=subprocess.STDOUT, shell=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
         return False
     else:
         return True
