@@ -1,6 +1,11 @@
 [tool.isort]
 profile = "black"
 
+[tool.documatic]
+name = "Doculog"
+srcdir = "doculog"
+docdir = "."
+
 [tool.doculog]
 changelog = "CHANGELOG"
 local = true
