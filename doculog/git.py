@@ -93,7 +93,9 @@ def get_commits(
 def _get_tag_date(tag_name: str) -> str:
     return (
         subprocess.check_output(
-            ["git", "log", "-1", "--format=%ai", tag_name], stderr=subprocess.STDOUT, shell=True
+            ["git", "log", "-1", "--format=%ai", tag_name],
+            stderr=subprocess.STDOUT,
+            shell=True,
         )
         .decode("utf-8")
         .split(" ")[0]
@@ -111,7 +113,9 @@ def list_tags() -> List[Tuple[str, str]]:
     """
     try:
         tags = (
-            subprocess.check_output(["git", "tag", "-n"], stderr=subprocess.STDOUT, shell=True)
+            subprocess.check_output(
+                ["git", "tag", "-n"], stderr=subprocess.STDOUT, shell=True
+            )
             .decode("utf-8")
             .split("\n")
         )
