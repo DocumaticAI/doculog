@@ -357,6 +357,7 @@ class ChangelogDoc:
             print(
                 "Git not enabled in current working directory. Not generating Changelog."
             )
+            return
 
         self.read()
 
