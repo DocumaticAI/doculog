@@ -57,6 +57,24 @@ class TestValidateKey:
         assert validate_key() is is_valid
         assert len(responses.calls) == 1
 
+    @responses.activate
+    @mock.patch.dict(
+        os.environ, {"DOCUMATIC_API_KEY": "12345", "DOCULOG_RUN_LOCALLY": "False"}
+    )
+    def test_returns_validated_response_with_documatic_api_key_but_not_doculog(self):
+        if "DOCULOG_API_KEY" in os.environ:
+            del os.environ["DOCULOG_API_KEY"]
+
+        responses.add(
+            responses.GET,
+            SERVER_DOMAIN + "validate",
+            status=200,
+            json={"message": True},
+        )
+
+        assert validate_key() is True
+        assert len(responses.calls) == 1
+
 
 class TestPost:
     @responses.activate
