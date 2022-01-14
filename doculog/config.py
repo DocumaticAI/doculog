@@ -27,11 +27,9 @@ def configure(project_root: Path) -> Dict:
 def configure_api(local):
     if (not local) and (not validate_key()):
         if "DOCUMATIC_API_KEY" in os.environ:
-            print("DOCUMATIC_API_KEY invalid. Advanced features disabled")
             del os.environ["DOCUMATIC_API_KEY"]
 
         if "DOCULOG_API_KEY" in os.environ:
-            print("DOCULOG_API_KEY invalid. Advanced features disabled.")
             del os.environ["DOCULOG_API_KEY"]
 
 

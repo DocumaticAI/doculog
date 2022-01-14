@@ -115,4 +115,10 @@ def validate_key() -> bool:
     if response.status_code == 200:
         return response.json()["message"]
     else:
+        if response.status_code == 403:
+            print(
+f"""\nAPI call error: {response.headers['x-amzn-errortype']}.
+Please file a bug report if this is unexpected.
+doculog can still run, but without advanced features.\n"""
+)
         return False
