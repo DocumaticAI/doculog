@@ -2,7 +2,7 @@ import pytest
 
 from doculog.changelog import ChangelogDoc, ChangelogRelease, ChangelogSection
 
-
+//no
 class TestChangelogSection:
     def test_accepts_hyphen_bulleted_commit(self):
         section = ChangelogSection("Added")
