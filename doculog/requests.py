@@ -97,6 +97,7 @@ def validate_key() -> bool:
     api_key = os.getenv("DOCUMATIC_API_KEY") or os.getenv("DOCULOG_API_KEY")
 
     if not api_key:
+        print("DOCUMATIC_API_KEY not in environment")
         return False
 
     if os.getenv("DOCULOG_RUN_LOCALLY") != "False":
@@ -107,7 +108,7 @@ def validate_key() -> bool:
         response = requests.get(
             SERVER_DOMAIN + "validate",
             params={"project": hashed_project},
-            headers={"x-api-key": api_key},
+            headers={"x-api-key": api_key, "content-type": "application/json"},
         )
     except requests.exceptions.ConnectionError:
         return False
@@ -117,8 +118,8 @@ def validate_key() -> bool:
     else:
         if response.status_code == 403:
             print(
-f"""\nAPI call error: {response.headers['x-amzn-errortype']}.
+                f"""\nAPI call error: {response.headers['x-amzn-errortype']}.
 Please file a bug report if this is unexpected.
 doculog can still run, but without advanced features.\n"""
-)
+            )
         return False
