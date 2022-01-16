@@ -12,23 +12,19 @@ leading_4_spaces = re.compile("^    ")
 
 def _get_git_command() -> str:
     if sys.platform.startswith("win"):
-        path = os.environ.get("PATH", "").split(os.pathsep)
-        path_exts = os.environ.get("PATHEXT", ".exe;.bat;.cmd").split(";")
-        has_ext = os.path.splitext("git")[1] in path_exts
-        if not has_ext:
-            exts = path_exts
-        else:
-            # Don't try to append any extensions
-            exts = [""]
-
-        for d in path:
-            try:
-                for ext in exts:
-                    exepath = os.path.join(d, "git" + ext)
-                    if os.access(exepath, os.X_OK):
-                        return exepath
-            except OSError:
-                pass
+        proc = subprocess.Popen(["where", "git"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+        git_paths, err = proc.communicate()
+        if err:
+            raise FileNotFoundError(err.decode(sys.stdout.encoding))
+        git_paths = git_paths.decode(sys.stdout.encoding).split('\n')
+        try:
+            for exepath in git_paths:
+                exepath = exepath.strip()
+                if os.access(exepath, os.X_OK):
+                    return exepath
+        except OSError:
+            pass
 
         return "git.cmd"
     else:
