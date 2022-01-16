@@ -7,6 +7,19 @@ and release notes
 by analysing your git history.
 A tool written in python,
 but works on any language.
+Once installed,
+simply run
+
+```bash
+doculog
+```
+
+in a terminal
+in a git-enabled
+project directory,
+and a changelog will be generated.
+For advanced changelog generation,
+you can use the [Documatic API](#api-key).
 
 ## Getting started
 
