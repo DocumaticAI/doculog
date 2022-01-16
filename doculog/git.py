@@ -12,12 +12,14 @@ leading_4_spaces = re.compile("^    ")
 
 def _get_git_command() -> str:
     if sys.platform.startswith("win"):
-        proc = subprocess.Popen(["where", "git"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            ["where", "git"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         proc.wait()
         git_paths, err = proc.communicate()
         if err:
             raise FileNotFoundError(err.decode(sys.stdout.encoding))
-        git_paths = git_paths.decode(sys.stdout.encoding).split('\n')
+        git_paths = git_paths.decode(sys.stdout.encoding).split("\n")
         try:
             for exepath in git_paths:
                 exepath = exepath.strip()
