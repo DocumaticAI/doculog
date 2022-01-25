@@ -23,7 +23,8 @@ def generate_changelog():
 
 
 parser = ArgumentParser(
-    prog=f"Doculog v{__version__}",
+    prog="doculog",
+    description=f"Doculog v{__version__}",
 )
 
 parser.add_argument("--cl", "-change-log", 
