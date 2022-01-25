@@ -189,6 +189,26 @@ changelog = "CHANGELOG"
 project = "My Cool Project"
 ```
 
+### Categorise your changes
+
+You can also categorise your changes based upon commits!
+
+This can easily be done by adding the `[tool.doculog.categories]`
+header to your `pyproject.toml`, example shown below.
+
+**Note:** Your commit message must be prefixed with your desired key.
+**Note:** Your key/value must be a string, see example for guidance
+
+| Field | Purpose | Required | Default value |
+|:------|:--------|:---------|:--------------|
+| create_section | Whether to create a seperate header for these tags, Header will be named after the value | No | false
+
+```
+[tool.doculog.categories]
+create_section = true
+"Feat: " = "New Features Added"
+```
+
 ## Developers
 
 Read the [contributing guide](CONTRIBUTING.md)
