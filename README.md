@@ -197,6 +197,7 @@ This can easily be done by adding the `[tool.doculog.categories]`
 header to your `pyproject.toml`, example shown below.
 
 **Note:** Your commit message must be prefixed with your desired key.
+
 **Note:** Your key/value must be a string, see example for guidance
 
 | Field | Purpose | Required | Default value |
