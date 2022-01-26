@@ -11,7 +11,7 @@ Once installed,
 simply run
 
 ```bash
-doculog -h
+doculog
 ```
 
 in a terminal
