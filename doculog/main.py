@@ -44,7 +44,7 @@ parser.add_argument("-ow", "--overwrite",
 )
 
 def parse():
-    args = {k: v for k, v in vars(parser.parse_args()).items() if v is not None}
+    args = {k: v for k, v in vars(parser.parse_args()).items() if v}
 
     if (not args) or args["cl"]:
         # Builds changelog if cl flag is present or no args provided
