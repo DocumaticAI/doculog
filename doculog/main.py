@@ -31,11 +31,11 @@ parser = ArgumentParser(
     description=f"Doculog v{__version__}",
 )
 
-parser.add_argument("-cl", "--changelog", 
-    action="store_true",
-    dest="cl",
-    help="generates changelog for project"
-)
+# parser.add_argument("-cl", "--changelog", 
+#     action="store_true",
+#     dest="cl",
+#     help="generates changelog for project"
+# )
 
 parser.add_argument("-ow", "--overwrite",
     action="store_true",
@@ -44,12 +44,7 @@ parser.add_argument("-ow", "--overwrite",
 )
 
 def parse():
-    args = {k: v for k, v in vars(parser.parse_args()).items() if v}
-
-    if (not args) or args["cl"]:
-        # Builds changelog if cl flag is present or no args provided
-        logger.debug("Generating changelog")
-        generate_changelog()
+    args = vars(parser.parse_args())
 
     if args["ow"]:
         if os.path.exists("./CHANGELOG.md"):
@@ -57,5 +52,13 @@ def parse():
             logger.info("Deleted original changelog, generating from scratch")
         else:
             logger.warn("Overwrite flag provided, but not file found")
+
+    # if (not any(True for v in args.values() if v)) or args["cl"]:
+    #     # Builds changelog if cl flag is present or no args provided
+    #     logger.debug("Generating changelog")
+    #     generate_changelog()
+
+    logger.debug("Generating changelog")
+    generate_changelog()
 
     exit(0)
