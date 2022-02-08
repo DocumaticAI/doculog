@@ -25,7 +25,7 @@ def generate_changelog(overwrite: bool = False):
         else:
             logger.warning("Skipping overwrite, existing changelog file not found", exc_info=1)
 
-    doc = ChangelogDoc(log_path, config["categories"], config["category_options"])
+    doc = ChangelogDoc(log_path)
     doc.generate()
     doc.save()
 
@@ -82,6 +82,7 @@ def parse():
 
     if args["v"]:
         print(f"v{__version__}")
+        exit(0)
 
     if args["p"]:
         path = os.path.abspath(args["p"])
