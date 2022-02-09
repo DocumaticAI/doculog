@@ -33,6 +33,7 @@ parse()
 
 This function parses command line arguments.
 It sets the logger and updates path to the project if a path is given in the command line arguments.
+If a 'v' flag is given it prints the version number.
 It then generates the changelog.
 ```
 
@@ -142,7 +143,9 @@ in the past 4 weeks. Tom Titcombe <t.j.titcombe@gmail.com> is the inferred code 
 ```python
 list_tags() -> List[Tuple[str, str]]
 
-This function takes a list of tags, and returns a list of tag names, sorted by date.
+This function calls git to get the list of tags.
+The code catches subprocess.CalledProcessError, FileNotFoundError
+Does not raise.
 ```
 
 ```python
@@ -153,8 +156,6 @@ It does this by calling the subprocess module to run the git command
 and then checks the output.
 If the git command exists, the function returns True.
 If the git command does not exist, the function returns False
-
-Does not raise.
 ```
 
 * git.py has 0 classes.
